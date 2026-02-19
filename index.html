@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Membaca Super - Visual Pro Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky-blue: #0ea5e9;
+            --btn-yellow: #fbbf24;
+            --btn-blue: #3b82f6;
+            --btn-pink: #ec4899;
+            --btn-green: #10b981;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #0ea5e9;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .font-game { font-family: 'Fredoka', sans-serif; font-weight: 700; }
+        
+        .btn-cartoon-3d {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-bottom: 6px solid rgba(0,0,0,0.2);
+            border-left: 2px solid rgba(255,255,255,0.2);
+            border-right: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .btn-cartoon-3d:active {
+            border-bottom-width: 2px;
+            transform: translateY(4px);
+        }
+
+        .btn-yellow { background: linear-gradient(to bottom, #fde047, #fbbf24); border-bottom-color: #b45309; color: #1e3a8a; }
+        .btn-pink { background: linear-gradient(to bottom, #f472b6, #ec4899); border-bottom-color: #9d174d; color: white; }
+        .btn-blue { background: #3b82f6; border-color: #1d4ed8; color: white; }
+
+        .profile-card {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #fbbf24;
+            border-radius: 1.2rem;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+        .profile-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid #fbbf24;
+            object-fit: cover;
+        }
+
+        .stats-card {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #3b82f6;
+            border-radius: 1.2rem;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-subtle { animation: bounce-subtle 3s infinite ease-in-out; }
+
+        .btn-game-main {
+            min-width: 170px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .btn-nav-bottom {
+            min-width: 180px;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            font-size: 13px;
+        }
+
+        .slot-active {
+            border: 6px dashed #3b82f6 !important;
+            background: #eff6ff !important;
+            color: #3b82f6 !important;
+        }
+        .slot-filled {
+            border: 6px solid #10b981 !important;
+            background: #10b981 !important;
+            color: white !important;
+            transform: scale(1.05);
+        }
+
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .p1-turn { border: 6px solid #3b82f6 !important; box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+        .p2-turn { border: 6px solid #ec4899 !important; box-shadow: 0 0 30px rgba(236, 72, 153, 0.5); }
+
+        .fullscreen-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(0.9);
+        }
+
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-subtle { animation: pulse-subtle 2s infinite ease-in-out; }
+    </style>
+</head>
+<body>
+
+    <div id="game-app" class="w-[96vw] h-[92vh] bg-white rounded-[4rem] shadow-2xl flex flex-col overflow-hidden relative border-[16px] border-white transition-all duration-500">
+        
+        <!-- DASHBOARD UTAMA -->
+        <div id="screen-start" class="absolute inset-0 z-20 overflow-hidden flex flex-col items-center">
+            <!-- Gambar Fullscreen Latar Belakang -->
+            <img src="https://i.imgur.com/XqC52re.png" onerror="this.src='https://i.imgur.com/XqC52re.png'" class="fullscreen-bg" alt="Latar Belakang Game">
+
+            <!-- Profil Pengembang -->
+            <div class="profile-card">
+                <img src="https://imgur.com/k6ER8Dl.png" onerror="this.src='https://imgur.com/k6ER8Dl.jpg'" class="profile-img" alt="Jecky Emerson">
+                <div class="flex flex-col">
+                    <h4 class="font-game text-indigo-900 text-[10px] leading-tight">Jecky Emerson, S.Pd., Gr</h4>
+                    <p class="text-[7.5px] text-blue-600 font-bold uppercase tracking-tighter">Duta Teknologi Kemendikdasmen</p>
+                </div>
+            </div>
+
+            <!-- Statistik Skor -->
+            <div class="stats-card">
+                <span class="text-xl">⭐</span>
+                <span id="dash-score" class="font-game text-xl text-blue-600">0</span>
+            </div>
+
+            <!-- Tombol Musik Cepat di Beranda -->
+            <button onclick="toggleMusic()" class="absolute top-[20px] right-[130px] w-12 h-12 flex items-center justify-center bg-white/90 rounded-2xl border-3 border-yellow-400 shadow-lg z-[100] active:scale-90 transition-transform">
+                <span id="music-icon-home" class="text-2xl">🎵</span>
+            </button>
+
+            <div class="dashboard-main h-full flex flex-col items-center justify-between py-14 relative z-10 w-full px-10">
+                
+                <!-- Spacer Atas -->
+                <div class="h-24"></div>
+
+                <!-- AREA KONTEN TENGAH (DISUSUN VERTIKAL) -->
+                <div class="flex flex-col items-center justify-center gap-6 transition-all flex-1">
+                    
+                    <!-- Ikon Buku -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-[90px] md:text-[130px] animate-bounce-subtle drop-shadow-2xl">📖</span>
+                    </div>
+                    
+                    <!-- Menu Tombol Permainan Utama -->
+                    <div class="flex flex-col items-center gap-6">
+                        <div class="flex flex-row items-center gap-6">
+                            <button onclick="startAdventure(false)" class="btn-cartoon-3d btn-yellow btn-game-main border-4 border-white shadow-xl scale-110">
+                                <span class="text-2xl">▶️</span>
+                                <span class="font-game text-xl uppercase tracking-tight">MULAI</span>
+                            </button>
+                            <button onclick="startAdventure(true)" class="btn-cartoon-3d btn-pink btn-game-main border-4 border-white shadow-xl scale-110">
+                                <span class="text-2xl">👥</span>
+                                <span class="font-game text-xl uppercase tracking-tight">DUEL</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AREA BAWAH: Tombol Navigasi -->
+                <div class="flex flex-row justify-center items-center gap-5 w-full mt-2">
+                    <button onclick="showInstructions()" class="btn-cartoon-3d btn-yellow btn-nav-bottom border-4 border-white shadow-2xl animate-pulse-subtle">
+                        <span class="text-lg">❓</span>
+                        <span class="font-game uppercase tracking-widest">BANTUAN</span>
+                    </button>
+                    <button onclick="showDeveloper()" class="btn-cartoon-3d btn-yellow btn-nav-bottom border-4 border-white shadow-2xl">
+                        <span class="text-lg">👨‍💻</span>
+                        <span class="font-game uppercase tracking-widest">PROFIL GURU</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HEADER GAMEPLAY -->
+        <div id="top-bar" class="hidden bg-blue-600 p-4 flex justify-between items-center text-white relative z-[100] shadow-xl border-b-4 border-blue-800 w-full">
+            <div class="flex items-center gap-4">
+                <button onclick="goHome()" class="w-10 h-10 flex items-center justify-center bg-white/20 rounded-xl hover:bg-white/40 border border-white/20 transition-transform active:scale-90">
+                    <span class="text-xl">🏠</span>
+                </button>
+                <!-- P1 Score -->
+                <div id="p1-box" class="flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-2xl border-2 border-transparent transition-all duration-300">
+                    <span class="font-game text-xs opacity-70 mr-1">P1</span>
+                    <span id="score-p1" class="text-xl font-game">0</span>
+                    <span class="text-xl">⭐</span>
+                </div>
+            </div>
+            
+            <div id="turn-indicator" class="flex flex-col items-center">
+                <div id="current-stage-name" class="font-game text-[10px] tracking-widest uppercase text-yellow-300 text-center">MISI MEMBACA</div>
+                <div id="turn-text" class="font-game text-lg hidden uppercase">GILIRAN KAMU!</div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- P2 Score -->
+                <div id="p2-box" class="hidden flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-2xl border-2 border-transparent transition-all duration-300">
+                    <span class="font-game text-xs opacity-70 mr-1">P2</span>
+                    <span id="score-p2" class="text-xl font-game">0</span>
+                    <span class="text-xl">⭐</span>
+                </div>
+                <!-- Tombol Musik -->
+                <button onclick="toggleMusic()" class="w-10 h-10 flex items-center justify-center bg-white/20 rounded-xl hover:bg-white/40 border border-white/20 transition-transform active:scale-90">
+                    <span id="music-icon-game" class="text-xl">🎵</span>
+                </button>
+                <!-- Tombol Suara TTS -->
+                <button onclick="toggleSound()" class="w-10 h-10 flex items-center justify-center bg-white/20 rounded-xl hover:bg-white/40 border border-white/20 transition-transform active:scale-90">
+                    <span id="sound-icon" class="text-xl">🔊</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="main-progress" class="hidden w-full h-4 bg-blue-50 shadow-inner relative z-30">
+            <div id="progress-line" class="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 transition-all duration-1000 w-0"></div>
+        </div>
+
+        <!-- AREA GAMEPLAY -->
+        <div id="game-content" class="hidden flex-1 relative flex flex-row items-center justify-center p-6 bg-blue-50/50 w-full h-full overflow-hidden">
+            <div class="w-1/3 h-full flex flex-col items-center justify-center border-r-4 border-white border-dashed">
+                <div id="hint-box" class="cursor-pointer group text-center" onclick="playHint()">
+                    <div id="item-emoji" class="text-[180px] md:text-[220px] mb-4 group-hover:scale-110 transition-transform drop-shadow-[0_15px_30px_rgba(0,0,0,0.1)] filter saturate-150">🍎</div>
+                    <div class="bg-blue-600 text-white px-6 py-2 rounded-full font-game text-sm tracking-widest uppercase shadow-lg group-hover:bg-blue-700">DENGARKAN 🔊</div>
+                </div>
+            </div>
+            <div class="w-2/3 h-full flex flex-col items-center justify-center pl-8">
+                <div id="game-slots" class="flex flex-wrap justify-center gap-4 mb-8 w-full"></div>
+                <div id="game-options" class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl px-4"></div>
+            </div>
+            
+            <div id="screen-result" class="hidden absolute inset-0 flex flex-col items-center justify-center p-12 bg-white/95 z-[200] transition-colors duration-1000">
+                <div id="winner-icon" class="text-[120px] drop-shadow-2xl animate-bounce">🏆</div>
+                <h2 id="winner-text" class="text-5xl font-game text-blue-700 mb-8 uppercase text-center">SELESAI!</h2>
+                <div class="grid grid-cols-2 gap-8 mb-8 w-full max-w-2xl" id="duel-result-grid">
+                    <div id="res-box-p1" class="bg-blue-50 p-6 rounded-[2rem] border-4 border-blue-200 flex flex-col items-center shadow-lg transition-all duration-500">
+                        <span class="text-blue-500 font-bold text-sm uppercase mb-2">Pemain 1</span>
+                        <span class="text-5xl font-game text-blue-600" id="final-p1-res">0</span>
+                    </div>
+                    <div id="res-box-p2" class="bg-pink-50 p-6 rounded-[2rem] border-4 border-pink-200 flex flex-col items-center shadow-lg transition-all duration-500">
+                        <span class="text-pink-500 font-bold text-sm uppercase mb-2">Pemain 2</span>
+                        <span class="text-5xl font-game text-pink-600" id="final-p2-res">0</span>
+                    </div>
+                </div>
+                <div id="single-result" class="hidden mb-8">
+                    <div class="bg-blue-50 p-8 rounded-[2rem] border-4 border-blue-200 flex items-center gap-10 shadow-lg">
+                        <span class="text-blue-500 font-bold text-2xl uppercase">Total Bintang</span>
+                        <span class="text-6xl font-game text-blue-600" id="final-single-res">0</span>
+                    </div>
+                </div>
+                <button onclick="goHome()" class="btn-cartoon-3d btn-yellow rounded-full px-12 py-4 text-blue-900 font-game text-2xl shadow-lg uppercase">KE DASHBOARD</button>
+            </div>
+        </div>
+
+        <div id="toast" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-16 py-8 rounded-[2rem] bg-white shadow-2xl border-[6px] border-green-400 text-green-600 font-game text-4xl opacity-0 pointer-events-none transition-all duration-500 z-[300]">BAGUS! 🌟</div>
+        
+        <!-- MODALS -->
+        <div id="screen-instructions" class="hidden absolute inset-0 z-[200] flex items-center justify-center bg-blue-900/60 backdrop-blur-sm p-6">
+            <div class="bg-white border-8 border-yellow-400 rounded-[3rem] p-10 max-w-2xl w-full flex flex-col items-center shadow-2xl text-center">
+                <h2 class="font-game text-5xl text-blue-600 mb-8 uppercase">CARA BERMAIN</h2>
+                <div class="grid grid-cols-1 gap-4 mb-10 text-left w-full">
+                    <div class="flex items-center gap-4 bg-blue-50 p-4 rounded-2xl border-2 border-blue-200">
+                        <span class="bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl">1</span>
+                        <p class="text-lg">Ikuti tahapan membaca dari huruf sampai kalimat.</p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-pink-50 p-4 rounded-2xl border-2 border-pink-200">
+                        <span class="bg-pink-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl">2</span>
+                        <p class="text-lg">Di mode <b>DUEL</b>, jika salah jawab, giliran langsung berpindah!</p>
+                    </div>
+                </div>
+                <button onclick="closeInstructions()" class="btn-cartoon-3d btn-pink rounded-full px-16 py-4 text-white font-game text-3xl uppercase">SIAP!</button>
+            </div>
+        </div>
+
+        <div id="screen-developer" class="hidden absolute inset-0 z-[210] flex items-center justify-center bg-indigo-900/70 backdrop-blur-sm p-6">
+            <div class="bg-white border-8 border-yellow-400 rounded-[3rem] p-10 max-w-2xl w-full flex flex-col items-center shadow-2xl text-center">
+                <h2 class="font-game text-4xl text-purple-600 mb-6 uppercase text-center">PENGEMBANG GAME</h2>
+                <div class="flex flex-row items-center gap-8 mb-8 text-left">
+                    <img src="https://imgur.com/k6ER8Dl.png" onerror="this.src='https://imgur.com/k6ER8Dl.jpg'" class="w-36 h-36 rounded-full border-6 border-yellow-400 object-cover shadow-2xl">
+                    <div>
+                        <h3 class="font-game text-2xl text-indigo-900 mb-1">Jecky Emerson, S.Pd., Gr</h3>
+                        <p class="text-sm text-indigo-600 font-bold uppercase tracking-tight">Duta Teknologi Kemendikdasmen</p>
+                    </div>
+                </div>
+                <button onclick="closeDeveloper()" class="btn-cartoon-3d btn-blue rounded-full px-16 py-4 text-white font-game text-3xl uppercase">KEMBALI</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inisialisasi Musik Latar
+        const bgMusic = new Audio("https://github.com/jeckyemerson34-JQ/musikgamebelajarmembaca/raw/refs/heads/main/The%20Game%20Show%20Theme%20Music.mp3");
+        bgMusic.loop = true;
+        bgMusic.volume = 0.4;
+        let isMusicEnabled = false;
+
+        // Mendengarkan klik pertama untuk memulai musik
+        document.addEventListener('click', () => {
+            if (!isMusicEnabled && document.getElementById('screen-start').style.display !== 'none') {
+                bgMusic.play().catch(() => {});
+                isMusicEnabled = true;
+                updateMusicIcons();
+            }
+        }, { once: true });
+
+        function toggleMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                isMusicEnabled = true;
+            } else {
+                bgMusic.pause();
+                isMusicEnabled = false;
+            }
+            updateMusicIcons();
+        }
+
+        function updateMusicIcons() {
+            const iconHome = document.getElementById('music-icon-home');
+            const iconGame = document.getElementById('music-icon-game');
+            const iconStr = isMusicEnabled ? "🎵" : "🔇";
+            if(iconHome) iconHome.textContent = iconStr;
+            if(iconGame) iconGame.textContent = iconStr;
+        }
+
+        const stages = [
+            { 
+                name: "TAHAP 1: HURUF A-Z", type: "letter", 
+                data: [
+                    { target: "A", options: ["A", "O", "E", "I"], hint: "A untuk Apel", emoji: "🍎" },
+                    { target: "B", options: ["B", "D", "P", "R"], hint: "B untuk Bola", emoji: "⚽" },
+                    { target: "C", options: ["C", "S", "G", "K"], hint: "C untuk Cicak", emoji: "🦎" },
+                    { target: "D", options: ["D", "B", "T", "L"], hint: "D untuk Domba", emoji: "🐑" },
+                    { target: "E", options: ["E", "F", "L", "H"], hint: "E untuk Elang", emoji: "🦅" },
+                    { target: "F", options: ["F", "V", "P", "K"], hint: "F untuk Foto", emoji: "📷" },
+                    { target: "G", options: ["G", "J", "C", "Q"], hint: "G untuk Gajah", emoji: "🐘" },
+                    { target: "H", options: ["H", "M", "N", "U"], hint: "H untuk Harimau", emoji: "🐯" },
+                    { target: "I", options: ["I", "L", "Y", "E"], hint: "I untuk Ikan", emoji: "🐟" },
+                    { target: "J", options: ["J", "G", "Z", "D"], hint: "J untuk Jerapah", emoji: "🦒" },
+                    { target: "K", options: ["K", "H", "X", "R"], hint: "K untuk Kuda", emoji: "🐎" },
+                    { target: "L", options: ["L", "I", "T", "V"], hint: "L untuk Lemon", emoji: "🍋" },
+                    { target: "M", options: ["M", "N", "W", "V"], hint: "M untuk Matahari", emoji: "☀️" },
+                    { target: "N", options: ["N", "M", "U", "V"], hint: "N untuk Nanas", emoji: "🍍" },
+                    { target: "O", options: ["O", "Q", "C", "U"], hint: "O untuk Obat", emoji: "💊" },
+                    { target: "P", options: ["P", "R", "B", "D"], hint: "P untuk Pisang", emoji: "🍌" },
+                    { target: "Q", options: ["Q", "O", "G", "C"], hint: "Q untuk Quran", emoji: "📖" },
+                    { target: "R", options: ["R", "P", "K", "L"], hint: "R untuk Roti", emoji: "🍞" },
+                    { target: "S", options: ["S", "C", "Z", "G"], hint: "S untuk Sapi", emoji: "🐄" },
+                    { target: "T", options: ["T", "L", "D", "U"], hint: "T untuk Topi", emoji: "🎩" },
+                    { target: "U", options: ["U", "V", "O", "W"], hint: "U untuk Ulat", emoji: "🐛" },
+                    { target: "V", options: ["V", "F", "W", "U"], hint: "V untuk Vas", emoji: "🏺" },
+                    { target: "W", options: ["W", "M", "V", "M"], hint: "W untuk Wortel", emoji: "🥕" },
+                    { target: "X", options: ["X", "Y", "Z", "K"], hint: "X untuk Xilofon", emoji: "🎹" },
+                    { target: "Y", options: ["Y", "V", "J", "I"], hint: "Y untuk Yoyo", emoji: "🪀" },
+                    { target: "Z", options: ["Z", "S", "X", "N"], hint: "Z untuk Zebra", emoji: "🦓" }
+                ] 
+            },
+            { 
+                name: "TAHAP 2: SUKU KATA", type: "syllable", 
+                data: [
+                    { target: ["BO", "LA"], options: ["BO", "BA", "LA", "LU"], hint: "Bola", emoji: "⚽" },
+                    { target: ["BU", "KU"], options: ["BU", "BE", "KU", "KA"], hint: "Buku", emoji: "📚" },
+                    { target: ["KA", "KI"], options: ["KA", "KE", "KI", "KU"], hint: "Kaki", emoji: "🦵" },
+                    { target: ["MA", "TA"], options: ["MA", "MI", "TA", "TU"], hint: "Mata", emoji: "👁️" },
+                    { target: ["KU", "DA"], options: ["KU", "KO", "DA", "DI"], hint: "Kuda", emoji: "🐎" }
+                ] 
+            },
+            { 
+                name: "TAHAP 3: EJAAN KATA", type: "spelling", 
+                data: [
+                    { target: ["I", "K", "A", "N"], options: ["I", "K", "A", "N", "E", "O"], hint: "Ikan", emoji: "🐟" },
+                    { target: ["G", "A", "J", "A", "H"], options: ["G", "A", "J", "A", "H", "B", "E"], hint: "Gajah", emoji: "🐘" },
+                    { target: ["B", "E", "B", "E", "K"], options: ["B", "E", "B", "E", "K", "D"], hint: "Bebek", emoji: "🦆" }
+                ] 
+            },
+            { 
+                name: "TAHAP 4: KALIMAT", type: "sentence", 
+                data: [
+                    { target: ["SAYA", "SUKA", "BACA"], options: ["SAYA", "SUKA", "BACA", "MAKAN"], hint: "Saya suka baca", emoji: "📖" },
+                    { target: ["IBU", "MASAK", "NASI"], options: ["IBU", "MASAK", "NASI", "SAYUR"], hint: "Ibu masak nasi", emoji: "👩‍🍳" }
+                ] 
+            }
+        ];
+
+        let isMultiplayer = false, currentPlayer = 1;
+        let currentStageIdx = 0, currentItemIdx = 0, currentSubStep = 0;
+        let scoreP1 = 0, scoreP2 = 0, soundEnabled = true, duelDataQueue = [];
+        const synth = window.speechSynthesis;
+
+        function speak(text) { if (!soundEnabled) return; synth.cancel(); const utter = new SpeechSynthesisUtterance(text); utter.lang = 'id-ID'; utter.rate = 0.95; utter.pitch = 1.1; synth.speak(utter); }
+        function toggleSound() { soundEnabled = !soundEnabled; document.getElementById('sound-icon').textContent = soundEnabled ? "🔊" : "🔇"; }
+        function showInstructions() { document.getElementById('screen-instructions').classList.remove('hidden'); speak("Ini cara bermainnya."); }
+        function closeInstructions() { document.getElementById('screen-instructions').classList.add('hidden'); }
+        function showDeveloper() { document.getElementById('screen-developer').classList.remove('hidden'); speak("Profil pengembang."); }
+        function closeDeveloper() { document.getElementById('screen-developer').classList.add('hidden'); }
+        function goHome() { location.reload(); }
+
+        function startAdventure(duelMode) {
+            // MATIKAN MUSIK OTOMATIS SAAT GAME DIMULAI
+            bgMusic.pause();
+            isMusicEnabled = false;
+            updateMusicIcons();
+
+            isMultiplayer = duelMode;
+            scoreP1 = 0; scoreP2 = 0; currentPlayer = 1;
+            
+            const s1 = document.getElementById('score-p1');
+            const s2 = document.getElementById('score-p2');
+            if(s1) s1.textContent = "0";
+            if(s2) s2.textContent = "0";
+
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('game-content').classList.remove('hidden');
+            document.getElementById('game-content').classList.add('flex');
+            document.getElementById('top-bar').classList.remove('hidden');
+            document.getElementById('top-bar').classList.add('flex');
+            document.getElementById('main-progress').classList.remove('hidden');
+            
+            if(isMultiplayer) {
+                duelDataQueue = [];
+                stages.forEach(stage => stage.data.forEach(item => duelDataQueue.push({...item, stageType: stage.type})));
+                duelDataQueue.sort(() => Math.random() - 0.5);
+                currentItemIdx = 0;
+                
+                const p2box = document.getElementById('p2-box');
+                if(p2box) p2box.classList.remove('hidden');
+                
+                document.getElementById('turn-text').classList.remove('hidden');
+                speak("Lomba dimulai! Salah jawab langsung ganti giliran!");
+            } else {
+                currentStageIdx = 0; currentItemIdx = 0;
+                const p2box = document.getElementById('p2-box');
+                if(p2box) p2box.classList.add('hidden');
+                document.getElementById('turn-text').classList.add('hidden');
+                speak("Ayo kita mulai belajar!");
+            }
+            currentSubStep = 0; updateTurnVisuals(); loadCurrentItem();
+        }
+
+        function updateTurnVisuals() {
+            if (!isMultiplayer) return;
+            const p1 = document.getElementById('p1-box');
+            const p2 = document.getElementById('p2-box');
+            const txt = document.getElementById('turn-text');
+            if (currentPlayer === 1) { 
+                p1.classList.add('p1-turn'); p2.classList.remove('p2-turn'); 
+                p1.classList.remove('opacity-50'); p2.classList.add('opacity-50');
+                txt.textContent = "GILIRAN PEMAIN 1"; txt.style.color = "#3b82f6"; 
+            } else { 
+                p2.classList.add('p2-turn'); p1.classList.remove('p1-turn'); 
+                p2.classList.remove('opacity-50'); p1.classList.add('opacity-50');
+                txt.textContent = "GILIRAN PEMAIN 2"; txt.style.color = "#ec4899"; 
+            }
+        }
+
+        function loadCurrentItem() {
+            let item = isMultiplayer ? duelDataQueue[currentItemIdx] : stages[currentStageIdx].data[currentItemIdx];
+            currentSubStep = 0;
+            document.getElementById('current-stage-name').textContent = isMultiplayer ? "MODE DUEL - ACAK" : stages[currentStageIdx].name;
+            document.getElementById('item-emoji').textContent = item.emoji;
+            
+            const slotContainer = document.getElementById('game-slots');
+            slotContainer.innerHTML = '';
+            let targetArray = Array.isArray(item.target) ? item.target : [item.target];
+            targetArray.forEach((val, i) => {
+                const s = document.createElement('div');
+                s.id = `slot-${i}`;
+                s.className = `flex items-center justify-center font-game border-[8px] border-dashed border-blue-200 bg-white rounded-[2rem] text-blue-100 px-6 py-4 text-4xl min-w-[100px] shadow-inner transition-all duration-300`;
+                s.textContent = "?";
+                slotContainer.appendChild(s);
+            });
+            document.getElementById('slot-0').classList.add('slot-active');
+
+            const optContainer = document.getElementById('game-options');
+            optContainer.innerHTML = '';
+            const shuffled = [...item.options].sort(() => Math.random() - 0.5);
+            shuffled.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = `btn-cartoon-3d btn-blue rounded-[1.5rem] font-game text-white p-5 text-3xl w-full flex items-center justify-center border-2 border-white`;
+                b.textContent = opt;
+                b.onclick = () => checkLogic(opt, b);
+                optContainer.appendChild(b);
+            });
+            setTimeout(() => { speak(item.hint); }, 800);
+        }
+
+        function checkLogic(choice, btn) {
+            let item = isMultiplayer ? duelDataQueue[currentItemIdx] : stages[currentStageIdx].data[currentItemIdx];
+            let targetArray = Array.isArray(item.target) ? item.target : [item.target];
+            
+            if (choice === targetArray[currentSubStep]) {
+                speak(choice);
+                const slot = document.getElementById(`slot-${currentSubStep}`);
+                slot.textContent = choice;
+                slot.classList.remove('slot-active', 'text-blue-100');
+                slot.classList.add('slot-filled', 'animate-bounce', 'shadow-lg');
+                btn.classList.add('opacity-0', 'pointer-events-none', 'scale-0');
+                currentSubStep++;
+                
+                if (currentSubStep < targetArray.length) {
+                    document.getElementById(`slot-${currentSubStep}`).classList.add('slot-active');
+                } else {
+                    if (currentPlayer === 1) { scoreP1 += 10; document.getElementById('score-p1').textContent = scoreP1; }
+                    else { scoreP2 += 10; document.getElementById('score-p2').textContent = scoreP2; }
+                    document.getElementById('dash-score').textContent = scoreP1 + scoreP2;
+                    showToast("HEBAT! 🌟");
+                    setTimeout(() => { nextItem(true); }, 1400);
+                }
+            } else { 
+                btn.classList.add('animate-shake'); 
+                setTimeout(() => btn.classList.remove('animate-shake'), 400); 
+
+                if (isMultiplayer) {
+                    speak("Salah! Ganti giliran.");
+                    showToast("GANTI GILIRAN! 🔄");
+                    currentPlayer = (currentPlayer === 1) ? 2 : 1;
+                    updateTurnVisuals();
+                    setTimeout(() => { speak("Giliran Pemain " + currentPlayer); }, 1000);
+                } else {
+                    speak("Bukan itu, coba lagi");
+                }
+            }
+        }
+
+        function nextItem(isSuccess) {
+            if (isSuccess) {
+                currentItemIdx++;
+                if (isMultiplayer) {
+                    if (currentItemIdx >= duelDataQueue.length) { showFinalResult(); return; }
+                    currentPlayer = (currentPlayer === 1) ? 2 : 1;
+                    updateTurnVisuals();
+                } else {
+                    if (currentItemIdx >= stages[currentStageIdx].data.length) {
+                        currentStageIdx++; currentItemIdx = 0;
+                        if (currentStageIdx >= stages.length) { showFinalResult(); return; }
+                        speak("Luar biasa! Tingkat selanjutnya.");
+                    }
+                }
+                loadCurrentItem();
+            }
+        }
+
+        function playHint() { 
+            const item = isMultiplayer ? duelDataQueue[currentItemIdx] : stages[currentStageIdx].data[currentItemIdx];
+            speak(item.hint); 
+        }
+
+        function showToast(msg) { 
+            const t = document.getElementById('toast'); t.textContent = msg; 
+            t.classList.remove('opacity-0'); t.classList.add('opacity-100', 'scale-110'); 
+            setTimeout(() => { t.classList.add('opacity-0'); t.classList.remove('opacity-100', 'scale-110'); }, 1000); 
+        }
+
+        function showFinalResult() {
+            const screen = document.getElementById('screen-result');
+            const winText = document.getElementById('winner-text');
+            const winIcon = document.getElementById('winner-icon');
+            screen.classList.remove('hidden');
+            
+            if (isMultiplayer) {
+                document.getElementById('duel-result-grid').classList.remove('hidden');
+                document.getElementById('single-result').classList.add('hidden');
+                document.getElementById('final-p1-res').textContent = scoreP1;
+                document.getElementById('final-p2-res').textContent = scoreP2;
+                
+                const box1 = document.getElementById('res-box-p1');
+                const box2 = document.getElementById('res-box-p2');
+
+                if (scoreP1 > scoreP2) {
+                    winText.textContent = "PEMAIN 1 JUARA! 🏆";
+                    winText.className = "text-5xl font-game text-blue-600 mb-8 uppercase text-center";
+                    screen.style.backgroundColor = "#eff6ff";
+                    box1.classList.add('scale-125', 'z-10', 'border-blue-500');
+                    speak("Selamat, pemain satu adalah pemenangnya! Kamu luar biasa!");
+                } else if (scoreP2 > scoreP1) {
+                    winText.textContent = "PEMAIN 2 JUARA! 🏆";
+                    winText.className = "text-5xl font-game text-pink-600 mb-8 uppercase text-center";
+                    screen.style.backgroundColor = "#fdf2f8";
+                    box2.classList.add('scale-125', 'z-10', 'border-pink-500');
+                    speak("Selamat, pemain dua adalah pemenangnya! Kamu hebat sekali!");
+                } else {
+                    winText.textContent = "HASIL SERI! 🤝";
+                    winText.className = "text-5xl font-game text-green-600 mb-8 uppercase text-center";
+                    winIcon.textContent = "✨";
+                    speak("Wah, hasil seri! Kalian berdua sama-sama jago membaca.");
+                }
+            } else {
+                document.getElementById('duel-result-grid').classList.add('hidden');
+                document.getElementById('single-result').classList.remove('hidden');
+                document.getElementById('final-single-res').textContent = scoreP1;
+                winText.textContent = "KAMU HEBAT! 🎉";
+                speak("Hore! Kamu sudah menyelesaikan semua tantangan membaca. Kamu luar biasa!");
+            }
+        }
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .animate-shake { animation: shake 0.4s ease-in-out; }
+            @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
