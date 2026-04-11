@@ -146,6 +146,22 @@
             50% { transform: scale(1.03); }
         }
         .animate-pulse-subtle { animation: pulse-subtle 2s infinite ease-in-out; }
+
+        /* Tombol Kontrol Cepat */
+        .quick-btn {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #fbbf24;
+            border-radius: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            z-index: 150;
+        }
+        .quick-btn:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -172,10 +188,17 @@
                 <span id="dash-score" class="font-game text-xl text-blue-600">0</span>
             </div>
 
-            <!-- Tombol Musik Cepat di Beranda -->
-            <button onclick="toggleMusic()" class="absolute top-[20px] right-[130px] w-12 h-12 flex items-center justify-center bg-white/90 rounded-2xl border-3 border-yellow-400 shadow-lg z-[100] active:scale-90 transition-transform">
-                <span id="music-icon-home" class="text-2xl">🎵</span>
-            </button>
+            <!-- Tombol Kontrol Kanan Atas (Dashboard) -->
+            <div class="absolute top-[20px] right-[130px] flex gap-3 z-[110]">
+                <!-- Tombol Musik -->
+                <button onclick="toggleMusic()" class="quick-btn border-yellow-400">
+                    <span id="music-icon-home" class="text-2xl">🎵</span>
+                </button>
+                <!-- Tombol Layar Penuh -->
+                <button onclick="toggleFullScreen()" class="quick-btn border-blue-400">
+                    <span id="fs-icon-home" class="text-2xl">⛶</span>
+                </button>
+            </div>
 
             <div class="dashboard-main h-full flex flex-col items-center justify-between py-14 relative z-10 w-full px-10">
                 
@@ -245,6 +268,10 @@
                     <span id="score-p2" class="text-xl font-game">0</span>
                     <span class="text-xl">⭐</span>
                 </div>
+                <!-- Tombol Layar Penuh (Game) -->
+                <button onclick="toggleFullScreen()" class="w-10 h-10 flex items-center justify-center bg-white/20 rounded-xl hover:bg-white/40 border border-white/20 transition-transform active:scale-90">
+                    <span id="fs-icon-game" class="text-xl">⛶</span>
+                </button>
                 <!-- Tombol Musik -->
                 <button onclick="toggleMusic()" class="w-10 h-10 flex items-center justify-center bg-white/20 rounded-xl hover:bg-white/40 border border-white/20 transition-transform active:scale-90">
                     <span id="music-icon-game" class="text-xl">🎵</span>
@@ -338,9 +365,8 @@
         bgMusic.volume = 0.4;
         let isMusicEnabled = false;
 
-        // Mendengarkan klik pertama untuk memulai musik
         document.addEventListener('click', () => {
-            if (!isMusicEnabled && document.getElementById('screen-start').style.display !== 'none') {
+            if (!isMusicEnabled && document.getElementById('screen-start').classList.contains('hidden') === false) {
                 bgMusic.play().catch(() => {});
                 isMusicEnabled = true;
                 updateMusicIcons();
@@ -366,6 +392,24 @@
             if(iconGame) iconGame.textContent = iconStr;
         }
 
+        // Fitur Full Screen
+        function toggleFullScreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl);
+            } else {
+                cancelFullScreen.call(doc);
+            }
+            
+            // Berikan feedback suara kecil
+            speak("Layar penuh diatur");
+        }
+
         const stages = [
             { 
                 name: "TAHAP 1: HURUF A-Z", type: "letter", 
@@ -375,26 +419,7 @@
                     { target: "C", options: ["C", "S", "G", "K"], hint: "C untuk Cicak", emoji: "🦎" },
                     { target: "D", options: ["D", "B", "T", "L"], hint: "D untuk Domba", emoji: "🐑" },
                     { target: "E", options: ["E", "F", "L", "H"], hint: "E untuk Elang", emoji: "🦅" },
-                    { target: "F", options: ["F", "V", "P", "K"], hint: "F untuk Foto", emoji: "📷" },
                     { target: "G", options: ["G", "J", "C", "Q"], hint: "G untuk Gajah", emoji: "🐘" },
-                    { target: "H", options: ["H", "M", "N", "U"], hint: "H untuk Harimau", emoji: "🐯" },
-                    { target: "I", options: ["I", "L", "Y", "E"], hint: "I untuk Ikan", emoji: "🐟" },
-                    { target: "J", options: ["J", "G", "Z", "D"], hint: "J untuk Jerapah", emoji: "🦒" },
-                    { target: "K", options: ["K", "H", "X", "R"], hint: "K untuk Kuda", emoji: "🐎" },
-                    { target: "L", options: ["L", "I", "T", "V"], hint: "L untuk Lemon", emoji: "🍋" },
-                    { target: "M", options: ["M", "N", "W", "V"], hint: "M untuk Matahari", emoji: "☀️" },
-                    { target: "N", options: ["N", "M", "U", "V"], hint: "N untuk Nanas", emoji: "🍍" },
-                    { target: "O", options: ["O", "Q", "C", "U"], hint: "O untuk Obat", emoji: "💊" },
-                    { target: "P", options: ["P", "R", "B", "D"], hint: "P untuk Pisang", emoji: "🍌" },
-                    { target: "Q", options: ["Q", "O", "G", "C"], hint: "Q untuk Quran", emoji: "📖" },
-                    { target: "R", options: ["R", "P", "K", "L"], hint: "R untuk Roti", emoji: "🍞" },
-                    { target: "S", options: ["S", "C", "Z", "G"], hint: "S untuk Sapi", emoji: "🐄" },
-                    { target: "T", options: ["T", "L", "D", "U"], hint: "T untuk Topi", emoji: "🎩" },
-                    { target: "U", options: ["U", "V", "O", "W"], hint: "U untuk Ulat", emoji: "🐛" },
-                    { target: "V", options: ["V", "F", "W", "U"], hint: "V untuk Vas", emoji: "🏺" },
-                    { target: "W", options: ["W", "M", "V", "M"], hint: "W untuk Wortel", emoji: "🥕" },
-                    { target: "X", options: ["X", "Y", "Z", "K"], hint: "X untuk Xilofon", emoji: "🎹" },
-                    { target: "Y", options: ["Y", "V", "J", "I"], hint: "Y untuk Yoyo", emoji: "🪀" },
                     { target: "Z", options: ["Z", "S", "X", "N"], hint: "Z untuk Zebra", emoji: "🦓" }
                 ] 
             },
@@ -439,7 +464,6 @@
         function goHome() { location.reload(); }
 
         function startAdventure(duelMode) {
-            // MATIKAN MUSIK OTOMATIS SAAT GAME DIMULAI
             bgMusic.pause();
             isMusicEnabled = false;
             updateMusicIcons();
@@ -464,10 +488,8 @@
                 stages.forEach(stage => stage.data.forEach(item => duelDataQueue.push({...item, stageType: stage.type})));
                 duelDataQueue.sort(() => Math.random() - 0.5);
                 currentItemIdx = 0;
-                
                 const p2box = document.getElementById('p2-box');
                 if(p2box) p2box.classList.remove('hidden');
-                
                 document.getElementById('turn-text').classList.remove('hidden');
                 speak("Lomba dimulai! Salah jawab langsung ganti giliran!");
             } else {
@@ -501,7 +523,6 @@
             currentSubStep = 0;
             document.getElementById('current-stage-name').textContent = isMultiplayer ? "MODE DUEL - ACAK" : stages[currentStageIdx].name;
             document.getElementById('item-emoji').textContent = item.emoji;
-            
             const slotContainer = document.getElementById('game-slots');
             slotContainer.innerHTML = '';
             let targetArray = Array.isArray(item.target) ? item.target : [item.target];
@@ -513,7 +534,6 @@
                 slotContainer.appendChild(s);
             });
             document.getElementById('slot-0').classList.add('slot-active');
-
             const optContainer = document.getElementById('game-options');
             optContainer.innerHTML = '';
             const shuffled = [...item.options].sort(() => Math.random() - 0.5);
@@ -530,7 +550,6 @@
         function checkLogic(choice, btn) {
             let item = isMultiplayer ? duelDataQueue[currentItemIdx] : stages[currentStageIdx].data[currentItemIdx];
             let targetArray = Array.isArray(item.target) ? item.target : [item.target];
-            
             if (choice === targetArray[currentSubStep]) {
                 speak(choice);
                 const slot = document.getElementById(`slot-${currentSubStep}`);
@@ -539,7 +558,6 @@
                 slot.classList.add('slot-filled', 'animate-bounce', 'shadow-lg');
                 btn.classList.add('opacity-0', 'pointer-events-none', 'scale-0');
                 currentSubStep++;
-                
                 if (currentSubStep < targetArray.length) {
                     document.getElementById(`slot-${currentSubStep}`).classList.add('slot-active');
                 } else {
@@ -552,7 +570,6 @@
             } else { 
                 btn.classList.add('animate-shake'); 
                 setTimeout(() => btn.classList.remove('animate-shake'), 400); 
-
                 if (isMultiplayer) {
                     speak("Salah! Ganti giliran.");
                     showToast("GANTI GILIRAN! 🔄");
@@ -599,16 +616,13 @@
             const winText = document.getElementById('winner-text');
             const winIcon = document.getElementById('winner-icon');
             screen.classList.remove('hidden');
-            
             if (isMultiplayer) {
                 document.getElementById('duel-result-grid').classList.remove('hidden');
                 document.getElementById('single-result').classList.add('hidden');
                 document.getElementById('final-p1-res').textContent = scoreP1;
                 document.getElementById('final-p2-res').textContent = scoreP2;
-                
                 const box1 = document.getElementById('res-box-p1');
                 const box2 = document.getElementById('res-box-p2');
-
                 if (scoreP1 > scoreP2) {
                     winText.textContent = "PEMAIN 1 JUARA! 🏆";
                     winText.className = "text-5xl font-game text-blue-600 mb-8 uppercase text-center";
